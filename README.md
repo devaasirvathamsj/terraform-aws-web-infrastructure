@@ -1,208 +1,251 @@
-# 🚀 Terraform AWS Infrastructure Project
+# Terraform AWS Web Infrastructure
 
-A complete AWS infrastructure built using **Terraform (IaC)** — provisioning a highly available web application with VPC, EC2 instances across multiple Availability Zones, and a Classic Load Balancer.
+![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat&logo=amazonaws&logoColor=white)
+![EC2](https://img.shields.io/badge/Amazon%20EC2-FF9900?style=flat&logo=amazonec2&logoColor=white)
+![S3](https://img.shields.io/badge/Amazon%20S3-569A31?style=flat&logo=amazons3&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Active-success?style=flat)
+![IaC](https://img.shields.io/badge/IaC-Terraform-7B42BC?style=flat)
+
+Provision a highly available AWS web infrastructure using Terraform. Deploys two Ubuntu EC2 instances across separate Availability Zones behind a Classic Load Balancer, within a custom VPC — all defined as code.
 
 ---
 
-## 📐 Architecture Diagram
+## Table of Contents
+
+- [Architecture](#architecture)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Resources](#resources)
+- [Configuration](#configuration)
+- [Security](#security)
+- [Outputs](#outputs)
+- [Cleanup](#cleanup)
+
+---
+
+## Architecture
 
 ```
-                         Internet
-                            │
-                       Route 53 (DNS)
-                            │
-                    Internet Gateway (IGW)
-                            │
-              ┌─────────────────────────────┐
-              │         VPC (10.0.0.0/16)   │
-              │                             │
-              │  ┌──────────────────────┐   │
-              │  │  Route Table         │   │
-              │  │  0.0.0.0/0 → IGW     │   │
-              │  └──────────────────────┘   │
-              │                             │
-              │  ┌──────────────────────┐   │
-              │  │  Security Group      │   │
-              │  │  Port 80 (HTTP) ✅   │   │
-              │  │  Port 22 (SSH)  ✅   │   │
-              │  └──────────────────────┘   │
-              │                             │
-              │  ┌─────────────────────┐    │
-              │  │  Classic Load       │    │
-              │  │  Balancer (ELB)     │    │
-              │  └────────┬────────────┘    │
-              │           │                 │
-              │    ┌──────┴──────┐          │
-              │    │             │          │
-              │ ┌──▼──────┐ ┌───▼─────┐    │
-              │ │Subnet 1 │ │Subnet 2 │    │
-              │ │10.0.1.0 │ │10.0.2.0 │    │
-              │ │/24      │ │/24      │    │
-              │ │us-east  │ │us-east  │    │
-              │ │-1a      │ │-1b      │    │
-              │ │         │ │         │    │
-              │ │WebServer│ │WebServer│    │
-              │ │    1    │ │    2    │    │
-              │ │t3.micro │ │t3.micro │    │
-              │ └─────────┘ └─────────┘    │
-              │                             │
-              │  ┌──────────────────────┐   │
-              │  │  S3 Bucket           │   │
-              │  │  deva-devops-2022    │   │
-              │  └──────────────────────┘   │
-              └─────────────────────────────┘
+                              ┌─────────────────────┐
+                              │       Internet       │
+                              └──────────┬──────────┘
+                                         │
+                              ┌──────────▼──────────┐
+                              │   Internet Gateway   │
+                              └──────────┬──────────┘
+                                         │
+                    ┌────────────────────────────────────────┐
+                    │              VPC  10.0.0.0/16          │
+                    │                                        │
+                    │         ┌──────────────────┐           │
+                    │         │   Route Table    │           │
+                    │         │ 0.0.0.0/0 → IGW  │           │
+                    │         └──────────────────┘           │
+                    │                                        │
+                    │         ┌──────────────────┐           │
+                    │         │  Load Balancer   │           │
+                    │         │    (Classic)     │           │
+                    │         └────────┬─────────┘           │
+                    │                  │                     │
+                    │         ┌────────┴─────────┐           │
+                    │         │                  │           │
+                    │  ┌──────▼───────┐  ┌───────▼──────┐   │
+                    │  │  us-east-1a  │  │  us-east-1b  │   │
+                    │  │ 10.0.1.0/24  │  │ 10.0.2.0/24  │   │
+                    │  │              │  │              │   │
+                    │  │  WebServer-1 │  │  WebServer-2 │   │
+                    │  │   t3.micro   │  │   t3.micro   │   │
+                    │  └──────────────┘  └──────────────┘   │
+                    │                                        │
+                    └────────────────────────────────────────┘
 ```
 
----
-
-## 🛠️ What I Built
-
-| Resource | Details |
-|---|---|
-| **VPC** | Custom VPC with CIDR `10.0.0.0/16` |
-| **Subnets** | 2 Public subnets across `us-east-1a` and `us-east-1b` |
-| **Internet Gateway** | Allows internet access to public subnets |
-| **Route Table** | Routes `0.0.0.0/0` traffic to IGW |
-| **Security Group** | Allows HTTP (80) and SSH (22) inbound traffic |
-| **EC2 Instances** | 2 x `t3.micro` Ubuntu web servers |
-| **Classic Load Balancer** | Distributes traffic between both EC2 instances |
-| **Target Group** | Health checks on port 80 |
-| **S3 Bucket** | Public S3 bucket for static assets |
-
----
-
-## 🧰 Tech Stack
-
-- **Cloud Provider** → AWS (Amazon Web Services)
-- **IaC Tool** → Terraform `v6.52.0`
-- **OS** → Ubuntu 24.04 LTS
-- **Instance Type** → t3.micro
-- **Region** → us-east-1 (N. Virginia)
-
----
-
-## 📁 Project Structure
+**Traffic Flow**
 
 ```
-terraform-project/
-├── main.tf              # Main infrastructure code
-├── variable.tf          # Input variables
-├── outputs.tf           # Output values (ELB DNS)
-├── user_data_1.sh       # WebServer-1 bootstrap script
-├── user_data_2.sh       # WebServer-2 bootstrap script
-└── README.md            # Project documentation
+User → Internet Gateway → Route Table → Load Balancer → EC2 (Round Robin)
 ```
 
 ---
 
-## ⚙️ How to Run
+## Prerequisites
 
-### Prerequisites
-- AWS CLI configured (`aws configure`)
-- Terraform installed (`terraform -v`)
-- AWS account with required permissions
+| Tool | Version | Install |
+|---|---|---|
+| Terraform | >= 1.0 | [terraform.io](https://terraform.io) |
+| AWS CLI | >= 2.0 | [aws.amazon.com/cli](https://aws.amazon.com/cli) |
+| AWS Account | - | [aws.amazon.com](https://aws.amazon.com) |
 
-### Steps
+Configure AWS credentials before running:
 
 ```bash
-# Step 1 - Clone the repository
-git clone https://github.com/devaasirvatham/terraform-aws-project.git
-cd terraform-aws-project
+aws configure
+```
 
-# Step 2 - Initialize Terraform
+---
+
+## Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/devaasirvathamsj/terraform-aws-web-infrastructure.git
+cd terraform-aws-web-infrastructure
+
+# Initialize Terraform
 terraform init
 
-# Step 3 - Format and validate
-terraform fmt
-terraform validate
-
-# Step 4 - Preview changes
+# Review execution plan
 terraform plan
 
-# Step 5 - Apply infrastructure
+# Deploy infrastructure
 terraform apply
+```
 
-# Step 6 - Destroy when done (avoid bill!)
-terraform destroy
+After apply completes, the ELB DNS endpoint will be printed as output.
+
+---
+
+## Resources
+
+The following AWS resources are provisioned:
+
+| Resource | Count | Details |
+|---|---|---|
+| VPC | 1 | CIDR: `var.cidr` |
+| Public Subnet | 2 | us-east-1a, us-east-1b |
+| Internet Gateway | 1 | Attached to VPC |
+| Route Table | 1 | Public — routes to IGW |
+| Security Group | 1 | HTTP (80), SSH (22) |
+| EC2 Instance | 2 | t3.micro, Ubuntu 24.04 LTS |
+| Classic Load Balancer | 1 | Internet-facing, HTTP:80 |
+| Target Group | 1 | HTTP:80 with health checks |
+| S3 Bucket | 1 | Public read — static assets |
+
+---
+
+## Configuration
+
+### Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `cidr` | - | VPC CIDR block (e.g. `10.0.0.0/16`) |
+
+Define variables in `terraform.tfvars`:
+
+```hcl
+cidr = "10.0.0.0/16"
+```
+
+### User Data
+
+Each EC2 instance runs a bootstrap script on first launch:
+
+| Script | Instance | Purpose |
+|---|---|---|
+| `user_data_1.sh` | WebServer-1 | Install and configure web server |
+| `user_data_2.sh` | WebServer-2 | Install and configure web server |
+
+### Health Check
+
+The load balancer performs health checks on each instance:
+
+```
+Protocol  : HTTP
+Path      : /
+Interval  : 30 seconds
+Timeout   : 5 seconds
+Threshold : 2 consecutive checks
 ```
 
 ---
 
-## 📤 Output
+## Project Structure
 
-After `terraform apply`, you will get:
-
-```bash
-Outputs:
-elb_dns_name = "my-elb-xxxxxxx.us-east-1.elb.amazonaws.com"
+```
+terraform-aws-web-infrastructure/
+├── main.tf               # Resource definitions
+├── variable.tf           # Input variable declarations
+├── outputs.tf            # Output value definitions
+├── terraform.tfvars      # Variable values (not committed)
+├── user_data_1.sh        # WebServer-1 bootstrap script
+├── user_data_2.sh        # WebServer-2 bootstrap script
+└── README.md
 ```
 
-Open the ELB DNS in your browser — traffic will be distributed between:
-- **WebServer-1** → `"Welcome devaasirvatham"`
-- **WebServer-2** → `"Welcome abishaa"`
+---
 
-Refresh the page to see load balancing in action! ⚡
+## Security
+
+### Security Group Rules
+
+| Direction | Protocol | Port | Source | Purpose |
+|---|---|---|---|---|
+| Inbound | TCP | 80 | `0.0.0.0/0` | HTTP traffic |
+| Inbound | TCP | 22 | `0.0.0.0/0` | SSH access |
+| Outbound | All | All | `0.0.0.0/0` | Unrestricted |
+
+> **Warning:** SSH is open to all IP addresses in this configuration. For production environments, restrict access to a known CIDR block.
+
+```hcl
+cidr_blocks = ["YOUR_IP/32"]
+```
 
 ---
 
-## 🔐 Security
+## Outputs
 
-| Rule | Port | Protocol | Source |
-|---|---|---|---|
-| HTTP Inbound | 80 | TCP | 0.0.0.0/0 |
-| SSH Inbound | 22 | TCP | 0.0.0.0/0 |
-| All Outbound | All | All | 0.0.0.0/0 |
-
-> ⚠️ **Note:** SSH is open to all IPs for demo purposes.  
-> In production, restrict SSH to your IP only!
-
----
-
-## 💡 Key Learnings
-
-- Infrastructure as Code (IaC) using Terraform
-- AWS VPC design with public subnets across multiple AZs
-- High availability using multi-AZ EC2 deployment
-- Load balancing traffic with Classic ELB
-- EC2 bootstrapping using User Data scripts
-- S3 bucket configuration with public access
-
----
-
-## 📸 Screenshots
-
-| Resource | Status |
+| Output | Description |
 |---|---|
-| EC2 Instances | ✅ Running |
-| Load Balancer | ✅ Active |
-| Target Group | ✅ Healthy |
-| Terraform Apply | ✅ Success |
+| `elb_dns_name` | DNS name of the Classic Load Balancer |
+
+After a successful apply:
+
+```bash
+terraform output elb_dns_name
+# my-elb-800681217.us-east-1.elb.amazonaws.com
+```
+
+Open in browser to verify the deployment. Refreshing the page will round-robin between WebServer-1 and WebServer-2, confirming load balancing is active.
 
 ---
 
-## 🧹 Cleanup
+## Screenshots
+
+**EC2 Instances**
+![EC2 Instances](./screenshots/ec2-instances.png)
+
+**Load Balancer**
+![Load Balancer](./screenshots/load-balancer.png)
+
+**Terraform Apply**
+![Terraform Apply](./screenshots/terraform-apply.png)
+
+**Application**
+![Application](./screenshots/app.png)
+
+---
+
+## Cleanup
+
+Destroy all provisioned resources to avoid ongoing charges:
 
 ```bash
 terraform destroy
 ```
 
-> Always destroy resources after practice to avoid AWS charges! 💸
+---
+
+## Author
+
+**Deva Asirvatham SJ**
+
+[![GitHub](https://img.shields.io/badge/GitHub-devaasirvathamsj-181717?style=flat&logo=github)](https://github.com/devaasirvathamsj)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin)](https://linkedin.com/in/devaasirvathamsj)
 
 ---
 
-## 👨‍💻 Author
+## License
 
-**Deva Asirvatham**  
-AWS DevOps Engineer (Learning)  
-📧 [LinkedIn](https://linkedin.com/in/devaasirvatham)  
-🐙 [GitHub](https://github.com/devaasirvatham)
-
----
-
-## 📜 License
-
-MIT License — feel free to use and modify!
-
----
-
-> *"Infrastructure as Code — Build once, deploy anywhere!"* 🚀
+MIT License. See [LICENSE](./LICENSE) for details.
