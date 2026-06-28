@@ -198,7 +198,7 @@ cidr_blocks = ["YOUR_IP/32"]
 
 | Output | Description |
 |---|---|
-| `elb_dns_name` | DNS name of the Classic Load Balancer |
+| `alb_dns_name` | DNS name of the Classic Load Balancer |
 
 After a successful apply:
 
