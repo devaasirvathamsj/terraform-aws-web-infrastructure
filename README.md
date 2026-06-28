@@ -102,7 +102,7 @@ terraform plan
 terraform apply
 ```
 
-After apply completes, the ELB DNS endpoint will be printed as output.
+After apply completes, the ALB DNS endpoint will be printed as output.
 
 ---
 
@@ -203,7 +203,7 @@ cidr_blocks = ["YOUR_IP/32"]
 After a successful apply:
 
 ```bash
-terraform output elb_dns_name
+terraform output alb_dns_name
 # my-alb-800681217.us-east-1.alb.amazonaws.com
 ```
 
