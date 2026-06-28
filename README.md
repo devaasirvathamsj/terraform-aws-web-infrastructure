@@ -7,7 +7,7 @@
 ![Status](https://img.shields.io/badge/Status-Active-success?style=flat)
 ![IaC](https://img.shields.io/badge/IaC-Terraform-7B42BC?style=flat)
 
-Provision a highly available AWS web infrastructure using Terraform. Deploys two Ubuntu EC2 instances across separate Availability Zones behind a Classic Load Balancer, within a custom VPC — all defined as code.
+Provision a highly available AWS web infrastructure using Terraform. Deploys two Ubuntu EC2 instances across separate Availability Zones behind a Application Load Balancer, within a custom VPC — all defined as code.
 
 ---
 
@@ -44,8 +44,8 @@ Provision a highly available AWS web infrastructure using Terraform. Deploys two
                     │         └──────────────────┘           │
                     │                                        │
                     │         ┌──────────────────┐           │
-                    │         │  Load Balancer   │           │
-                    │         │    (Classic)     │           │
+                    │         │    AL Balancer   │           │
+                    │         │   (Application)  │           │
                     │         └────────┬─────────┘           │
                     │                  │                     │
                     │         ┌────────┴─────────┐           │
@@ -118,7 +118,7 @@ The following AWS resources are provisioned:
 | Route Table | 1 | Public — routes to IGW |
 | Security Group | 1 | HTTP (80), SSH (22) |
 | EC2 Instance | 2 | t3.micro, Ubuntu 24.04 LTS |
-| Classic Load Balancer | 1 | Internet-facing, HTTP:80 |
+| Application Load Balancer | 1 | Internet-facing, HTTP:80 |
 | Target Group | 1 | HTTP:80 with health checks |
 | S3 Bucket | 1 | Public read — static assets |
 
