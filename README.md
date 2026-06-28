@@ -28,11 +28,11 @@ Provision a highly available AWS web infrastructure using Terraform. Deploys two
 
 ```
                               ┌─────────────────────┐
-                              │       Internet       │
+                              │       Internet      │
                               └──────────┬──────────┘
                                          │
                               ┌──────────▼──────────┐
-                              │   Internet Gateway   │
+                              │   Internet Gateway  │
                               └──────────┬──────────┘
                                          │
                     ┌────────────────────────────────────────┐
@@ -50,13 +50,13 @@ Provision a highly available AWS web infrastructure using Terraform. Deploys two
                     │                  │                     │
                     │         ┌────────┴─────────┐           │
                     │         │                  │           │
-                    │  ┌──────▼───────┐  ┌───────▼──────┐   │
-                    │  │  us-east-1a  │  │  us-east-1b  │   │
-                    │  │ 10.0.1.0/24  │  │ 10.0.2.0/24  │   │
-                    │  │              │  │              │   │
-                    │  │  WebServer-1 │  │  WebServer-2 │   │
-                    │  │   t3.micro   │  │   t3.micro   │   │
-                    │  └──────────────┘  └──────────────┘   │
+                    │  ┌──────▼───────┐  ┌───────▼──────┐    │
+                    │  │  us-east-1a  │  │  us-east-1b  │    │
+                    │  │ 10.0.1.0/24  │  │ 10.0.2.0/24  │    │
+                    │  │              │  │              │    │
+                    │  │  WebServer-1 │  │  WebServer-2 │    │
+                    │  │   t3.micro   │  │   t3.micro   │    │
+                    │  └──────────────┘  └──────────────┘    │
                     │                                        │
                     └────────────────────────────────────────┘
 ```
