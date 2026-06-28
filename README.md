@@ -198,13 +198,13 @@ cidr_blocks = ["YOUR_IP/32"]
 
 | Output | Description |
 |---|---|
-| `alb_dns_name` | DNS name of the Classic Load Balancer |
+| `alb_dns_name` | DNS name of the Application Load Balancer |
 
 After a successful apply:
 
 ```bash
 terraform output elb_dns_name
-# my-elb-800681217.us-east-1.elb.amazonaws.com
+# my-alb-800681217.us-east-1.alb.amazonaws.com
 ```
 
 Open in browser to verify the deployment. Refreshing the page will round-robin between WebServer-1 and WebServer-2, confirming load balancing is active.
